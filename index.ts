@@ -19,17 +19,24 @@ async function main() {
   try {
     await moduleSystem.repository.refresh();
     
+    // Create a list to track our modules
+    const loadedModules = [];
+    
     // Register the HTTP server module
     console.log("📡 Registering HTTP server module...");
     const httpModule = await import('./src/http-server/index');
-    await moduleSystem.manager.registerModule(httpModule.createModule());
+    const httpModuleInstance = httpModule.createModule();
+    moduleSystem.manager.registerModule(httpModuleInstance);
+    loadedModules.push(httpModuleInstance);
     
     // Register other modules if available
     try {
       console.log("📊 Looking for admin dashboard module...");
       // If admin dashboard exists, register it
       const adminDashboard = await import('./src/admin-dashboard/index');
-      await moduleSystem.manager.registerModule(adminDashboard.createModule());
+      const adminModule = adminDashboard.createModule();
+      moduleSystem.manager.registerModule(adminModule);
+      loadedModules.push(adminModule);
       console.log("✅ Admin dashboard module registered");
     } catch (error) {
       console.warn("Admin dashboard module not found. Continuing without it.");
@@ -38,7 +45,9 @@ async function main() {
     try {
       console.log("🗄️ Looking for static files module...");
       const staticFiles = await import('./src/static-files/index');
-      await moduleSystem.manager.registerModule(staticFiles.createModule());
+      const staticFilesModule = staticFiles.createModule();
+      moduleSystem.manager.registerModule(staticFilesModule);
+      loadedModules.push(staticFilesModule);
       console.log("✅ Static files module registered");
     } catch (error) {
       console.warn("Static files module not found. Continuing without it.");
@@ -46,9 +55,22 @@ async function main() {
     
     // Start all registered modules
     console.log("🚀 Starting all modules...");
-    const modules = moduleSystem.repository.listModules();
-    const moduleIds = modules.map(m => m.id);
-    await moduleSystem.manager.loadModules(moduleIds);
+    for (const module of loadedModules) {
+      console.log(`Starting module: ${module.getManifest().id}...`);
+      try {
+        await module.initialize({
+          store: moduleSystem.systemStore,
+          services: moduleSystem.serviceRegistry,
+          getModule: (id) => {
+            const mod = loadedModules.find(m => m.getManifest().id === id);
+            return mod || null;
+          }
+        });
+        console.log(`Module ${module.getManifest().id} started successfully`);
+      } catch (error) {
+        console.error(`Failed to start module ${module.getManifest().id}:`, error);
+      }
+    }
     
     console.log("✅ AppletHub is running!");
     console.log("📊 Admin dashboard available at: http://localhost:3000/admin");
@@ -62,11 +84,13 @@ async function main() {
         console.log("\n🛑 Shutting down AppletHub...");
         
         // Stop all modules
-        for (const moduleId of moduleIds) {
+        for (const module of loadedModules) {
           try {
-            await moduleSystem.manager.stopModule(moduleId);
+            console.log(`Stopping module: ${module.getManifest().id}...`);
+            await module.stop();
+            console.log(`Module ${module.getManifest().id} stopped successfully`);
           } catch (err) {
-            console.error(`Error stopping module ${moduleId}:`, err);
+            console.error(`Error stopping module ${module.getManifest().id}:`, err);
           }
         }
         
@@ -78,6 +102,16 @@ async function main() {
       await new Promise(() => {});
     } else {
       console.log("🧪 Running in test mode, shutting down automatically");
+      
+      // Stop all modules
+      console.log("🛑 Stopping all modules...");
+      for (const module of loadedModules) {
+        try {
+          await module.stop();
+        } catch (err) {
+          console.error(`Error stopping module ${module.getManifest().id}:`, err);
+        }
+      }
     }
     
     return moduleSystem;
