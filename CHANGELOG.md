@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Admin Dashboard module for system monitoring and management
+  - System information panel with resource usage stats
+  - Module manager for starting/stopping modules
+  - TupleStore explorer with interactive data browser
+  - Dashboard service for programmatic access to system info
 - Documentation framework with guides, API references, and architecture overviews
 - CONTRIBUTING.md guide for new contributors
 - CHANGELOG.md to track project changes

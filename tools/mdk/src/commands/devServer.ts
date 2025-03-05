@@ -61,7 +61,7 @@ export async function startDevServer(options: DevServerOptions = {}): Promise<vo
     signals.forEach((signal) => {
       process.on(signal, () => {
         if (proc) {
-          proc.kill(signal);
+          proc.kill();
         }
         process.exit(0);
       });

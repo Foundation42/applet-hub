@@ -101,11 +101,11 @@ export async function createModule(
     // Create the module from the template
     console.log(chalk.blue(`Creating ${templateType} module: ${moduleName}`));
     
-    const templateDir = path.join(templatesDir, templateType);
+    const templateDir = path.join(templatesDir, templateType || '');
     await processTemplateDirectory(templateDir, destinationDir, {
       moduleId,
       moduleName,
-      moduleDescription
+      moduleDescription: moduleDescription || `${moduleName} module for AppletHub`
     });
     
     console.log(chalk.green(`Module created successfully at ${destinationDir}`));

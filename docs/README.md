@@ -43,6 +43,7 @@ The UI System provides a component-based approach to building user interfaces. I
 - [Creating UI Components](./guides/ui-components.md)
 - [Using the Service Registry](./guides/service-registry.md)
 - [Advanced Module Patterns](./guides/advanced-modules.md)
+- [Admin Dashboard](./modules/admin-dashboard.md)
 
 ## API Reference
 
