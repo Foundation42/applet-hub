@@ -1,0 +1,12 @@
+{
+  "id": "ui-test-app",
+  "name": "Ui Test App",
+  "description": "UI components test application",
+  "version": "0.1.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["ui-components"],
+  "slots": ["main", "sidebar"],
+  "dependencies": {
+    "ui-components": "^1.0.0"
+  }
+}

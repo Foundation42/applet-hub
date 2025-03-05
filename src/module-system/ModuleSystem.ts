@@ -120,6 +120,25 @@ export interface ModuleContext {
    * Get a reference to another module (if available)
    */
   getModule: (moduleId: string) => Module | undefined;
+  
+  /**
+   * UI system (optional) - for managing UI components and views
+   */
+  ui?: {
+    /**
+     * Register a UI view component to be rendered in a slot
+     */
+    registerView: (options: { 
+      slot: string, 
+      component: string, 
+      priority?: number 
+    }) => void;
+    
+    /**
+     * Unregister a UI view component
+     */
+    unregisterView: (slot: string, componentId: string) => void;
+  };
 }
 
 /**

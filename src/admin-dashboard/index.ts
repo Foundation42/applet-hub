@@ -86,52 +86,38 @@ export class AdminDashboardModule implements Module {
     if (path === '/admin' || path.startsWith('/admin/')) {
       console.log(`Admin dashboard handling request: ${path}`);
       
-      // Get access to UI Component Service
-      // Get all services
+      // Get access to UI Component Service with improved error handling
       const allServices = this.context?.services.getAllServices();
-      console.log('Available services:', allServices ? Array.from(allServices.keys()) : 'None');
+      const serviceKeys = allServices ? Array.from(allServices.keys()) : [];
+      console.log('Available services:', serviceKeys);
       
-      const uiService = this.context?.services.getService('uiComponentService');
-      if (!uiService) {
-        console.error('UI Component service not found, using fallback HTML');
+      try {
+        // Get the UI component service
+        const uiService = this.context?.services.getService('uiComponentService');
         
-        // Try to find UI service with different patterns
-        console.log('Looking for any UI-related services...');
-        const serviceKeys = allServices ? Array.from(allServices.keys()) : [];
-        const uiRelatedServices = serviceKeys.filter(k => 
-          k.toLowerCase().includes('ui') || 
-          k.toLowerCase().includes('component')
-        );
-        
-        if (uiRelatedServices.length > 0) {
-          console.log('Found UI-related services:', uiRelatedServices);
-          // Try each one
-          for (const key of uiRelatedServices) {
-            console.log(`Trying service: ${key}`);
-            const service = this.context?.services.getService(key);
-            if (service) {
-              console.log(`Found alternative UI service: ${key}`, service);
+        if (!uiService) {
+          console.error('UI Component service not found, using fallback HTML');
+        } else {
+          try {
+            // Import and register admin dashboard components
+            const { registerComponents } = await import('./components');
+            
+            // Log available methods for debugging
+            console.log('UI Service methods:', Object.keys(uiService));
+            
+            // Check if registerComponent is available and register components
+            if (typeof uiService.registerComponent === 'function') {
+              await registerComponents(uiService);
+              console.log('UI components registered for admin dashboard');
+            } else {
+              console.error('UI service is missing registerComponent method');
             }
+          } catch (error) {
+            console.error('Error registering admin components:', error);
           }
         }
-      } else {
-        try {
-          // Import UI components and register them
-          const { registerComponents } = await import('./components');
-          
-          // Log what's in the uiService to debug
-          console.log('UI Service methods:', Object.keys(uiService));
-          
-          // Check if registerComponent is available
-          if (typeof uiService.registerComponent === 'function') {
-            await registerComponents(uiService);
-            console.log('UI components registered for admin dashboard');
-          } else {
-            console.error('UI service is missing registerComponent method:', uiService);
-          }
-        } catch (error) {
-          console.error('Error registering admin components:', error);
-        }
+      } catch (error) {
+        console.error('Error accessing UI component service:', error);
       }
       
       // Generate a simpler dashboard HTML with direct implementation of the panels
@@ -301,103 +287,273 @@ export class AdminDashboardModule implements Module {
         // Expose dashboard service to components
         dashboardService: {
           getSystemStats: async () => {
-            const response = await fetch('/admin/api/system-stats');
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/system-stats');
+              if (!response.ok) {
+                throw new Error('Failed to fetch system stats: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error fetching system stats:', error);
+              return null;
+            }
           },
           listModules: async () => {
-            const response = await fetch('/admin/api/modules');
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/modules');
+              if (!response.ok) {
+                throw new Error('Failed to fetch modules: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error fetching modules:', error);
+              return [];
+            }
           },
           getModule: async (id) => {
-            const response = await fetch('/admin/api/modules/' + id);
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/modules/' + id);
+              if (!response.ok) {
+                throw new Error('Failed to fetch module: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error fetching module:', error);
+              return null;
+            }
           },
           startModule: async (id) => {
-            const response = await fetch('/admin/api/modules/' + id + '/start', {
-              method: 'POST'
-            });
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/modules/' + id + '/start', {
+                method: 'POST'
+              });
+              if (!response.ok) {
+                throw new Error('Failed to start module: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error starting module:', error);
+              return { success: false, error: error.message };
+            }
           },
           stopModule: async (id) => {
-            const response = await fetch('/admin/api/modules/' + id + '/stop', {
-              method: 'POST'
-            });
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/modules/' + id + '/stop', {
+                method: 'POST'
+              });
+              if (!response.ok) {
+                throw new Error('Failed to stop module: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error stopping module:', error);
+              return { success: false, error: error.message };
+            }
           },
           listServices: async () => {
-            const response = await fetch('/admin/api/services');
-            return response.json();
+            try {
+              const response = await fetch('/admin/api/services');
+              if (!response.ok) {
+                throw new Error('Failed to fetch services: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error fetching services:', error);
+              return [];
+            }
           },
           getTupleStoreData: async (path) => {
-            const url = '/admin/api/tuplestore' + (path ? '?path=' + path : '');
-            const response = await fetch(url);
-            return response.json();
+            try {
+              const url = '/admin/api/tuplestore' + (path ? '?path=' + path : '');
+              const response = await fetch(url);
+              if (!response.ok) {
+                throw new Error('Failed to fetch tuplestore data: ' + response.status);
+              }
+              return response.json();
+            } catch (error) {
+              console.error('Error fetching tuplestore data:', error);
+              return null;
+            }
           }
         },
         
-        // Create a minimal UI component service for the browser
+        // Create a compatible UI component service for the browser
+        // This matches the interface of the server-side UIComponentService
         uiComponentService: {
           components: new Map(),
+          styleElement: null,
           
-          registerComponent(component) {
+          // Initialize style element
+          init: function() {
+            if (!this.styleElement) {
+              try {
+                this.styleElement = document.createElement('style');
+                this.styleElement.id = 'applethub-component-styles';
+                document.head.appendChild(this.styleElement);
+                console.log('UI Component Service initialized in browser');
+              } catch (error) {
+                console.error('Error initializing UI Component Service:', error);
+              }
+            }
+          },
+          
+          registerComponent: function(component) {
+            if (!component || !component.id) {
+              console.error('Invalid component definition');
+              return;
+            }
+            
+            // Initialize style element if needed
+            this.init();
+            
+            // Check if already registered
+            if (this.components.has(component.id)) {
+              console.warn('Component already registered: ' + component.id);
+              return;
+            }
+            
+            // Add to registry
             this.components.set(component.id, component);
             
             // Add styles if provided
-            if (component.styles) {
-              const styleId = 'style-' + component.id;
-              let styleEl = document.getElementById(styleId);
-              
-              if (!styleEl) {
-                styleEl = document.createElement('style');
-                styleEl.id = styleId;
-                document.head.appendChild(styleEl);
-              }
-              
-              styleEl.textContent = component.styles;
+            if (component.styles && this.styleElement) {
+              this.styleElement.textContent = this.styleElement.textContent + '\n/* ' + component.id + ' */\n' + component.styles;
             }
+            
+            console.log('Registered component: ' + component.id);
           },
           
-          createComponent(id, props = {}) {
-            const component = this.components.get(id);
-            if (!component) {
-              console.error('Component not found: ' + id);
-              return null;
-            }
-            
-            // Merge props with defaults
-            const mergedProps = { ...component.defaultProps, ...props };
-            
-            // Create container
-            const container = document.createElement('div');
-            container.className = 'ah-component ah-component-' + id;
-            container.innerHTML = component.template(mergedProps);
-            
-            // Initialize component
-            if (component.init) {
-              try {
-                const instance = component.init(container, mergedProps);
-                if (instance) {
-                  // Store instance data
-                  container.__componentInstance = instance;
-                }
-              } catch (error) {
-                console.error('Error initializing component ' + id + ':', error);
-              }
-            }
-            
-            return container;
-          },
-          
-          getComponent(id) {
+          getComponent: function(id) {
             return this.components.get(id);
           },
           
-          getAllComponents() {
+          getAllComponents: function() {
             return Array.from(this.components.values());
+          },
+          
+          getComponentsByCategory: function(category) {
+            return this.getAllComponents().filter(c => c.category === category);
+          },
+          
+          createComponent: function(id, props = {}) {
+            try {
+              const component = this.components.get(id);
+              if (!component) {
+                console.error('Component not found: ' + id);
+                return null;
+              }
+              
+              // Merge props with defaults
+              const mergedProps = { ...(component.defaultProps || {}), ...props };
+              
+              // Create container
+              const container = document.createElement("div");
+              container.className = 'ah-component ah-component-' + id;
+              container.innerHTML = component.template(mergedProps);
+              
+              // Initialize component
+              if (component.init) {
+                try {
+                  const instance = component.init(container, mergedProps);
+                  if (instance) {
+                    // Store instance data
+                    container.__componentInstance = instance;
+                  }
+                } catch (error) {
+                  console.error('Error initializing component ' + id + ':', error);
+                }
+              }
+              
+              return container;
+            } catch (error) {
+              console.error('Error creating component ' + id + ':', error);
+              return null;
+            }
+          },
+          
+          updateComponent: function(element, props = {}) {
+            try {
+              // Get component ID
+              const classList = Array.from(element.classList);
+              const componentClass = classList.find(c => c.startsWith("ah-component-"));
+              if (!componentClass) {
+                console.error("Not a component element");
+                return;
+              }
+              
+              const id = componentClass.replace("ah-component-", "");
+              const component = this.components.get(id);
+              if (!component) {
+                console.error('Component not found: ' + id);
+                return;
+              }
+              
+              // Call update method if available
+              if (component.update) {
+                try {
+                  component.update(element, props);
+                } catch (error) {
+                  console.error('Error updating component ' + id + ':', error);
+                }
+              } else {
+                // Default update behavior: re-render
+                const mergedProps = { ...(component.defaultProps || {}), ...props };
+                element.innerHTML = component.template(mergedProps);
+                
+                // Re-initialize component
+                if (component.init) {
+                  try {
+                    const instance = component.init(element, mergedProps);
+                    if (instance) {
+                      // Store instance data
+                      element.__componentInstance = instance;
+                    }
+                  } catch (error) {
+                    console.error('Error re-initializing component ' + id + ':', error);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error updating component:', error);
+            }
+          },
+          
+          cleanupComponent: function(element) {
+            try {
+              // Get component ID
+              const classList = Array.from(element.classList);
+              const componentClass = classList.find(c => c.startsWith("ah-component-"));
+              if (!componentClass) {
+                return;
+              }
+              
+              const id = componentClass.replace("ah-component-", "");
+              const component = this.components.get(id);
+              if (!component) {
+                return;
+              }
+              
+              // Call cleanup method if available
+              if (component.cleanup) {
+                try {
+                  component.cleanup(element);
+                } catch (error) {
+                  console.error('Error cleaning up component ' + id + ':', error);
+                }
+              }
+              
+              // Clear instance data
+              delete element.__componentInstance;
+            } catch (error) {
+              console.error('Error cleaning up component:', error);
+            }
           }
         }
       }
     };
+    
+    // Initialize the UI component service
+    window.AppletHub.services.uiComponentService.init();
     
     // Helper function to fetch and handle API data
     async function fetchApi(endpoint) {

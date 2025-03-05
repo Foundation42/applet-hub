@@ -7,7 +7,8 @@ import {
 } from "../module-system/ModuleSystem";
 import { UIComponentService } from "./services/UIComponentService";
 import { registerComponents } from "./components";
-// Define theme service here to avoid document reference issues
+
+// Define Theme interface here to avoid import issues
 export interface Theme {
   name: string;
   colors: Record<string, string>;
@@ -158,21 +159,14 @@ export class UIComponentModule implements Module {
         servicesExists: !!context.services
       });
 
-      // Browser environment check to modify UIComponentService behavior
+      // Browser environment check
       const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+      
       if (!isBrowser) {
-        console.log('Running in Node.js environment, modifying UIComponentService implementation');
-        // Override document-dependent methods
-        this.uiComponentService = new UIComponentService();
-        
-        // Override browser-specific methods
-        this.uiComponentService.registerComponent = function(component) {
-          console.log(`Registered component: ${component.id} (server-side)`);
-          this.components.set(component.id, component);
-        };
+        console.log('Running in Node.js environment, using server-side implementation');
       }
 
-      // Register the UI component service
+      // Register the UI component service with environment-aware methods
       const uiComponentServiceDefinition: ServiceDefinition = {
         id: "uiComponentService",
         implementation: {
@@ -180,12 +174,29 @@ export class UIComponentModule implements Module {
           getComponent: this.uiComponentService.getComponent.bind(this.uiComponentService),
           getAllComponents: this.uiComponentService.getAllComponents.bind(this.uiComponentService),
           getComponentsByCategory: this.uiComponentService.getComponentsByCategory.bind(this.uiComponentService),
-          createComponent: isBrowser ? this.uiComponentService.createComponent.bind(this.uiComponentService) : 
-            () => { console.log('createComponent called in non-browser environment'); return null; }
+          // Only bind createComponent in browser environment, otherwise use a safe stub
+          createComponent: isBrowser 
+            ? this.uiComponentService.createComponent.bind(this.uiComponentService) 
+            : () => { 
+                console.log('createComponent called in non-browser environment'); 
+                return null; 
+              },
+          // Include updateComponent and cleanupComponent to make API complete
+          updateComponent: isBrowser 
+            ? this.uiComponentService.updateComponent.bind(this.uiComponentService) 
+            : () => { 
+                console.log('updateComponent called in non-browser environment'); 
+              },
+          cleanupComponent: isBrowser 
+            ? this.uiComponentService.cleanupComponent.bind(this.uiComponentService) 
+            : () => { 
+                console.log('cleanupComponent called in non-browser environment'); 
+              }
         },
         version: "1.0.0",
         metadata: {
           description: "Service for registering and retrieving UI components",
+          provider: "ui-components"
         },
       };
 
@@ -204,6 +215,7 @@ export class UIComponentModule implements Module {
         version: "1.0.0",
         metadata: {
           description: "Service for managing themes",
+          provider: "ui-components"
         },
       };
 
@@ -220,60 +232,14 @@ export class UIComponentModule implements Module {
         if (storedTheme) {
           this.themeService.setTheme(storedTheme);
         } else {
-          // Set default theme
-          const defaultTheme = {
-            name: "light",
-            colors: {
-              primary: "#4a63e6",
-              secondary: "#6c757d",
-              background: "#ffffff",
-              surface: "#f8f9fa",
-              text: "#212529",
-              textSecondary: "#6c757d",
-              border: "#dee2e6",
-              error: "#dc3545",
-              warning: "#ffc107",
-              success: "#28a745",
-              info: "#17a2b8",
-            },
-            fontFamily:
-              'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-            fontSize: {
-              small: "0.875rem",
-              base: "1rem",
-              large: "1.25rem",
-              xlarge: "1.5rem",
-              xxlarge: "2rem",
-            },
-            spacing: {
-              xs: "0.25rem",
-              sm: "0.5rem",
-              md: "1rem",
-              lg: "1.5rem",
-              xl: "2rem",
-              xxl: "3rem",
-            },
-            borderRadius: {
-              small: "0.25rem",
-              base: "0.375rem",
-              large: "0.5rem",
-              full: "9999px",
-            },
-            shadows: {
-              small: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
-              base: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
-              large: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
-            },
-            darkMode: false,
-          };
-
-          this.themeService.setTheme(defaultTheme);
+          // Use default theme from the ThemeService
+          const defaultTheme = this.themeService.getTheme();
           if (context.store) {
             context.store.set("theme", defaultTheme);
           }
         }
 
-        // Subscribe to theme changes
+        // Subscribe to theme changes if in browser
         if (isBrowser) {
           this.themeService.subscribe((theme) => {
             // Update store
@@ -349,6 +315,12 @@ export class UIComponentModule implements Module {
       getAllComponents: this.uiComponentService.getAllComponents.bind(
         this.uiComponentService
       ),
+      getComponentsByCategory: this.uiComponentService.getComponentsByCategory.bind(
+        this.uiComponentService
+      ),
+      createComponent: typeof window !== 'undefined' 
+        ? this.uiComponentService.createComponent.bind(this.uiComponentService)
+        : () => null,
 
       getTheme: this.themeService.getTheme.bind(this.themeService),
       setTheme: this.themeService.setTheme.bind(this.themeService),
@@ -360,7 +332,7 @@ export class UIComponentModule implements Module {
   /**
    * Apply theme to document
    */
-  private applyThemeToDocument(theme: any): void {
+  private applyThemeToDocument(theme: Theme): void {
     // Check if we're in a browser environment
     if (typeof document === 'undefined') {
       console.log('Not in browser environment, skipping theme application');

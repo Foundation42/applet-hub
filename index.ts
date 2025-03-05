@@ -78,6 +78,35 @@ async function main() {
       console.warn("Static files module not found. Continuing without it.");
     }
     
+    // Load UI test app module if available
+    try {
+      console.log("🧪 Looking for UI test app module...");
+      const uiTestApp = await import('./src/ui-test-app/index');
+      const uiTestAppModule = {
+        initialize: uiTestApp.initialize,
+        stop: uiTestApp.cleanup,
+        getState: () => 'active',
+        getManifest: () => ({
+          id: 'ui-test-app',
+          name: 'UI Test App',
+          description: 'UI components test application',
+          version: '0.1.0',
+          entryPoint: 'index.ts',
+          capabilities: ['ui-components'],
+          slots: ['main', 'sidebar'],
+          dependencies: {
+            'ui-components': '^1.0.0'
+          }
+        })
+      };
+      moduleSystem.manager.registerModule(uiTestAppModule);
+      loadedModules.push(uiTestAppModule);
+      console.log("✅ UI test app module registered");
+    } catch (error) {
+      console.error("Error loading UI test app module:", error);
+      console.warn("UI test app module not found. Continuing without it.");
+    }
+    
     // Start all registered modules
     console.log("🚀 Starting all modules...");
     for (const module of loadedModules) {
