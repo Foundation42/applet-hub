@@ -183,6 +183,11 @@ export interface ServiceRegistry {
    * List all available services
    */
   listServices(): ServiceDefinition[];
+  
+  /**
+   * Get all services with their versions
+   */
+  getAllServices(): Map<string, Map<string, ServiceDefinition>>;
 
   /**
    * Unregister a service

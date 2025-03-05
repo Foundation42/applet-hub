@@ -75,10 +75,20 @@ export class UIComponentService {
   private styleElement: HTMLStyleElement | null = null;
 
   constructor() {
-    // Create style element for component styles
-    this.styleElement = document.createElement("style");
-    this.styleElement.id = "applethub-component-styles";
-    document.head.appendChild(this.styleElement);
+    // Create style element for component styles if in browser environment
+    if (typeof document !== 'undefined') {
+      try {
+        this.styleElement = document.createElement("style");
+        this.styleElement.id = "applethub-component-styles";
+        document.head.appendChild(this.styleElement);
+      } catch (error) {
+        console.warn("Running in non-browser environment, skipping style element creation");
+        this.styleElement = null;
+      }
+    } else {
+      console.warn("Running in non-browser environment, skipping style element creation");
+      this.styleElement = null;
+    }
   }
 
   /**

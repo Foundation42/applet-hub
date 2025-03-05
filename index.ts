@@ -5,6 +5,7 @@ import { TupleStoreFactory } from './src/tuple-store/factory';
 // Parse command line arguments
 const args = process.argv.slice(2);
 const testMode = args.includes('--test') || args.includes('-t');
+const detachedMode = args.includes('--detached') || args.includes('-d');
 
 async function main() {
   console.log("=== Starting AppletHub ===");
@@ -30,14 +31,38 @@ async function main() {
     loadedModules.push(httpModuleInstance);
     
     // Register other modules if available
+    // First load UI components module which other modules depend on
+    try {
+      console.log("🎨 Looking for UI components module...");
+      const uiComponents = await import('./src/ui-components/index');
+      const uiComponentsModule = uiComponents.createModule();
+      
+      // Register the module
+      const registration = moduleSystem.manager.registerModule(uiComponentsModule);
+      if (registration) {
+        loadedModules.push(uiComponentsModule);
+        console.log("✅ UI components module registered successfully");
+      } else {
+        console.error("❌ Failed to register UI components module");
+      }
+    } catch (error) {
+      console.error("Error loading UI components module:", error);
+      console.warn("UI components module not found. Continuing without it.");
+    }
+    
     try {
       console.log("📊 Looking for admin dashboard module...");
       // If admin dashboard exists, register it
-      const adminDashboard = await import('./src/admin-dashboard/index');
-      const adminModule = adminDashboard.createModule();
-      moduleSystem.manager.registerModule(adminModule);
-      loadedModules.push(adminModule);
-      console.log("✅ Admin dashboard module registered");
+      try {
+        const adminDashboard = await import('./src/admin-dashboard/index');
+        const adminModule = adminDashboard.createModule();
+        moduleSystem.manager.registerModule(adminModule);
+        loadedModules.push(adminModule);
+        console.log("✅ Admin dashboard module registered");
+      } catch (importError) {
+        console.error("Error importing admin dashboard:", importError);
+        throw importError;
+      }
     } catch (error) {
       console.warn("Admin dashboard module not found. Continuing without it.");
     }
@@ -59,7 +84,9 @@ async function main() {
       console.log(`Starting module: ${module.getManifest().id}...`);
       try {
         await module.initialize({
+          manifest: module.getManifest(),
           store: moduleSystem.systemStore,
+          system: moduleSystem.systemStore,
           services: moduleSystem.serviceRegistry,
           getModule: (id) => {
             const mod = loadedModules.find(m => m.getManifest().id === id);
@@ -75,11 +102,8 @@ async function main() {
     console.log("✅ AppletHub is running!");
     console.log("📊 Admin dashboard available at: http://localhost:3000/admin");
     
-    // If not in test mode, keep the process alive
-    if (!testMode) {
-      console.log("💡 Press Ctrl+C to stop the server");
-      
-      // Set up graceful shutdown
+    // Set up graceful shutdown
+    const setupShutdown = () => {
       process.on('SIGINT', async () => {
         console.log("\n🛑 Shutting down AppletHub...");
         
@@ -97,10 +121,10 @@ async function main() {
         console.log("👋 Goodbye!");
         process.exit(0);
       });
-      
-      // Keep the process alive
-      await new Promise(() => {});
-    } else {
+    };
+    
+    // Determine how to proceed based on mode
+    if (testMode) {
       console.log("🧪 Running in test mode, shutting down automatically");
       
       // Stop all modules
@@ -112,6 +136,27 @@ async function main() {
           console.error(`Error stopping module ${module.getManifest().id}:`, err);
         }
       }
+    } else if (detachedMode) {
+      console.log("🔄 Running in detached mode");
+      setupShutdown();
+      
+      // Start a timer that runs every minute to keep the process alive
+      // This allows us to return control to the CLI without closing the server
+      const timer = setInterval(() => {
+        const now = new Date();
+        if (now.getSeconds() === 0) {
+          console.log(`AppletHub running (${now.toLocaleTimeString()})`);
+        }
+      }, 1000);
+      
+      // Allow the main function to return, keeping the process alive
+      return moduleSystem;
+    } else {
+      console.log("💡 Press Ctrl+C to stop the server");
+      setupShutdown();
+      
+      // Keep the process alive
+      await new Promise(() => {});
     }
     
     return moduleSystem;

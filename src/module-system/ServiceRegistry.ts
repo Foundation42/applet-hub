@@ -106,6 +106,26 @@ export class DefaultServiceRegistry implements ServiceRegistry {
 
     return result;
   }
+  
+  /**
+   * Get all services with their versions
+   */
+  getAllServices(): Map<string, Map<string, ServiceDefinition>> {
+    // Return a copy of the services map
+    const result = new Map<string, Map<string, ServiceDefinition>>();
+    
+    for (const [key, versions] of this.services.entries()) {
+      const versionsCopy = new Map<string, ServiceDefinition>();
+      
+      for (const [version, service] of versions.entries()) {
+        versionsCopy.set(version, { ...service });
+      }
+      
+      result.set(key, versionsCopy);
+    }
+    
+    return result;
+  }
 
   /**
    * Unregister a service

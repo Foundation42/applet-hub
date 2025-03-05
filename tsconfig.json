@@ -11,7 +11,7 @@
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,  // Changed from true to fix type imports
     "noEmit": true,
 
     // Best practices
@@ -22,6 +22,22 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Path aliases for cleaner imports
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@ui-components/*": ["src/ui-components/*"],
+      "@module-system/*": ["src/module-system/*"],
+      "@tuple-store/*": ["src/tuple-store/*"],
+      "@http-server/*": ["src/http-server/*"],
+      "@admin-dashboard/*": ["src/admin-dashboard/*"],
+      "@client-sdk/*": ["src/client-sdk/*"],
+      "@websocket-server/*": ["src/websocket-server/*"],
+      "@static-files/*": ["src/static-files/*"],
+      "@github-webhook/*": ["src/github-webhook/*"]
+    }
+  },
+  "include": ["src/**/*"]
 }

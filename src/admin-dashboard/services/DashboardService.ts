@@ -1,5 +1,5 @@
 // admin-dashboard/services/DashboardService.ts
-import { ModuleContext } from '../../../module-system.ts/ModuleSystem';
+import { ModuleContext } from '../../module-system/ModuleSystem';
 
 /**
  * System resource usage statistics
@@ -57,16 +57,24 @@ export class DashboardService {
   /**
    * Get system statistics
    */
-  async getSystemStats(): Promise<SystemStats> {
+  async getSystemStats(): Promise<SystemStats & { version: string }> {
     // In a real implementation, we would get actual system stats
     // For now, we'll return simulated values
     
     const modules = await this.listModules();
     const services = await this.listServices();
     
+    // Generate realistic system stats
+    // CPU varies between 5-45% to show some activity
+    const cpuUsage = Math.floor(Math.random() * 40) + 5;
+    
+    // Memory usage between 100-800MB
+    const memoryUsage = Math.floor(Math.random() * 700) + 100;
+    
     return {
-      memory: Math.floor(50 + Math.random() * 100),
-      cpu: Math.floor(Math.random() * 30),
+      version: this.getVersion(),
+      memory: memoryUsage,
+      cpu: cpuUsage,
       uptime: Date.now() - this.startTime,
       modulesCount: modules.length,
       servicesCount: services.length,
@@ -85,22 +93,91 @@ export class DashboardService {
    * List all modules
    */
   async listModules(): Promise<ModuleInfo[]> {
-    // In a real implementation, we would get this from the ModuleManager
-    // For now, we'll return a static list
+    // Try to get actual modules from the context if available
+    if (this.context?.getModule) {
+      try {
+        // Use any available module list from the service registry
+        const serviceRegistry = this.context.services;
+        const result: ModuleInfo[] = [];
+        
+        // Get modules from the context
+        const httpModule = this.context.getModule('http-server');
+        if (httpModule) {
+          result.push({
+            id: 'http-server',
+            name: 'HTTP Server',
+            version: httpModule.getManifest().version,
+            description: httpModule.getManifest().description || 'HTTP server implementation',
+            status: httpModule.getState() === 'active' ? 'active' : 
+                  httpModule.getState() === 'error' ? 'error' : 'inactive',
+            required: true,
+          });
+        }
+        
+        const uiModule = this.context.getModule('ui-components');
+        if (uiModule) {
+          result.push({
+            id: 'ui-components',
+            name: 'UI Components',
+            version: uiModule.getManifest().version,
+            description: uiModule.getManifest().description || 'UI component library',
+            status: uiModule.getState() === 'active' ? 'active' : 
+                  uiModule.getState() === 'error' ? 'error' : 'inactive',
+            required: true,
+            capabilities: ['ui-components'],
+          });
+        }
+        
+        const adminModule = this.context.getModule('admin-dashboard');
+        if (adminModule) {
+          result.push({
+            id: 'admin-dashboard',
+            name: 'Admin Dashboard',
+            version: adminModule.getManifest().version,
+            description: adminModule.getManifest().description || 'Administrator dashboard for AppletHub',
+            status: adminModule.getState() === 'active' ? 'active' : 
+                  adminModule.getState() === 'error' ? 'error' : 'inactive',
+            required: false,
+            dependencies: { 'ui-components': '^1.0.0' },
+            capabilities: ['ui-components'],
+          });
+        }
+        
+        const staticFilesModule = this.context.getModule('static-files');
+        if (staticFilesModule) {
+          result.push({
+            id: 'static-files',
+            name: 'Static Files',
+            version: staticFilesModule.getManifest().version,
+            description: staticFilesModule.getManifest().description || 'Static file server',
+            status: staticFilesModule.getState() === 'active' ? 'active' : 
+                  staticFilesModule.getState() === 'error' ? 'error' : 'inactive',
+            required: false,
+          });
+        }
+        
+        if (result.length > 0) {
+          return result;
+        }
+      } catch (error) {
+        console.error('Error getting modules from context:', error);
+      }
+    }
+    
+    // Fallback to static modules list
     return [
       {
-        id: 'core',
-        name: 'Core',
-        version: '0.1.0',
-        description: 'Core AppletHub functionality',
+        id: 'http-server',
+        name: 'HTTP Server',
+        version: '1.0.0',
+        description: 'HTTP server implementation',
         status: 'active',
         required: true,
-        capabilities: ['core'],
       },
       {
         id: 'ui-components',
         name: 'UI Components',
-        version: '0.1.0',
+        version: '1.0.0',
         description: 'UI component library',
         status: 'active',
         required: true,
@@ -109,7 +186,7 @@ export class DashboardService {
       {
         id: 'admin-dashboard',
         name: 'Admin Dashboard',
-        version: '0.1.0',
+        version: '1.0.0',
         description: 'Administrator dashboard for AppletHub',
         status: 'active',
         required: false,
@@ -117,17 +194,18 @@ export class DashboardService {
         capabilities: ['ui-components'],
       },
       {
-        id: 'http-server',
-        name: 'HTTP Server',
-        version: '0.1.0',
-        description: 'HTTP server implementation',
-        status: 'inactive',
+        id: 'static-files',
+        name: 'Static Files',
+        version: '1.0.0',
+        description: 'Static file server implementation',
+        status: 'active',
         required: false,
+        dependencies: { 'http-server': '^1.0.0' },
       },
       {
         id: 'websocket-server',
         name: 'WebSocket Server',
-        version: '0.1.0',
+        version: '1.0.0',
         description: 'WebSocket server implementation',
         status: 'inactive',
         required: false,
@@ -166,14 +244,57 @@ export class DashboardService {
    * List all services
    */
   async listServices(): Promise<ServiceInfo[]> {
-    // In a real implementation, we would get this from the ServiceRegistry
-    // For now, we'll return a static list
+    // Try to get actual services from the context if available
+    if (this.context?.services) {
+      try {
+        // Get all services from the service registry
+        const allServices = this.context.services.getAllServices();
+        const result: ServiceInfo[] = [];
+        
+        // Convert the service registry map to our ServiceInfo format
+        if (allServices) {
+          for (const [serviceId, versionMap] of allServices.entries()) {
+            for (const [version, serviceDefinition] of versionMap.entries()) {
+              const methods = Object.keys(serviceDefinition.implementation);
+              
+              result.push({
+                id: serviceId,
+                version: version,
+                provider: serviceDefinition.metadata?.provider || 'system',
+                methods: methods,
+                metadata: serviceDefinition.metadata,
+              });
+            }
+          }
+          
+          if (result.length > 0) {
+            return result;
+          }
+        }
+      } catch (error) {
+        console.error('Error getting services from context:', error);
+      }
+    }
+    
+    // Fallback to static services list
     return [
+      {
+        id: 'httpServer',
+        version: '1.0.0',
+        provider: 'http-server',
+        methods: ['registerHandler', 'getConfig', 'setConfig', 'getServer', 'restart'],
+      },
       {
         id: 'uiComponentService',
         version: '1.0.0',
         provider: 'ui-components',
-        methods: ['registerComponent', 'getComponent', 'createComponent'],
+        methods: ['registerComponent', 'getComponent', 'getAllComponents', 'createComponent'],
+      },
+      {
+        id: 'themeService',
+        version: '1.0.0',
+        provider: 'ui-components',
+        methods: ['getTheme', 'setTheme', 'toggleDarkMode', 'subscribe'],
       },
       {
         id: 'dashboardService',
@@ -187,6 +308,7 @@ export class DashboardService {
           'startModule',
           'stopModule',
           'listServices',
+          'getTupleStoreData',
         ],
       },
     ];
@@ -225,11 +347,12 @@ export class DashboardService {
     
     // Navigate to the requested path
     const parts = path.split('.');
-    let current = data;
+    let current: any = data;
     
     for (const part of parts) {
       if (current === null || current === undefined) return undefined;
-      current = current[part];
+      // Use safe access for any type of data
+      current = (typeof current === 'object' && current !== null) ? current[part] : undefined;
     }
     
     return current;

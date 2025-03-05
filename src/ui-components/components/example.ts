@@ -1,7 +1,7 @@
-// examples/ui-components-usage.js
+// ui-components/components/example.ts
 
 // Import the SDK
-import { createAppletHub } from '@applethub/client-sdk';
+import { createAppletHub } from '../../client-sdk/AppletHubClient';
 
 /**
  * Example of using the UI component library
@@ -226,4 +226,40 @@ async function uiComponentsExample() {
       }
       
       .custom-alert-success {
-        background-color: #e8f5e9
+        background-color: #e8f5e9;
+        border-left: 4px solid var(--color-success);
+      }
+      
+      .custom-alert-warning {
+        background-color: #fff3e0;
+        border-left: 4px solid var(--color-warning);
+      }
+      
+      .custom-alert-error {
+        background-color: #ffebee;
+        border-left: 4px solid var(--color-error);
+      }
+    `
+  });
+  
+  // Create example alerts
+  const alertContainer = document.getElementById('alert-example');
+  if (alertContainer) {
+    const severities = ['info', 'success', 'warning', 'error'];
+    
+    severities.forEach(severity => {
+      const alert = uiComponentService.createComponent('custom-alert', {
+        title: `${severity.charAt(0).toUpperCase() + severity.slice(1)} Alert`,
+        message: `This is an example ${severity} alert message.`,
+        severity
+      });
+      
+      if (alert) {
+        alertContainer.appendChild(alert);
+      }
+    });
+  }
+}
+
+// Export the example function
+export { uiComponentsExample };
