@@ -40,10 +40,17 @@ bun install
 ### Running the application
 
 ```bash
-# Start the development server
-bun run index.ts
+# Start the development server (stays running)
+bun run dev 
+# or
+bun run start
 
-# Run tests
+# Start the server in test mode (auto-exits after startup)
+bun run test-start
+# or manually
+bun run index.ts --test
+
+# Run unit tests
 bun test
 
 # Type checking

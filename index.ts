@@ -2,6 +2,10 @@
 import { createModuleSystem } from './src/module-system/ModuleSystemFactory';
 import { TupleStoreFactory } from './src/tuple-store/factory';
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const testMode = args.includes('--test') || args.includes('-t');
+
 async function main() {
   console.log("=== Starting AppletHub ===");
   
@@ -48,6 +52,35 @@ async function main() {
     
     console.log("✅ AppletHub is running!");
     console.log("📊 Admin dashboard available at: http://localhost:3000/admin");
+    
+    // If not in test mode, keep the process alive
+    if (!testMode) {
+      console.log("💡 Press Ctrl+C to stop the server");
+      
+      // Set up graceful shutdown
+      process.on('SIGINT', async () => {
+        console.log("\n🛑 Shutting down AppletHub...");
+        
+        // Stop all modules
+        for (const moduleId of moduleIds) {
+          try {
+            await moduleSystem.manager.stopModule(moduleId);
+          } catch (err) {
+            console.error(`Error stopping module ${moduleId}:`, err);
+          }
+        }
+        
+        console.log("👋 Goodbye!");
+        process.exit(0);
+      });
+      
+      // Keep the process alive
+      await new Promise(() => {});
+    } else {
+      console.log("🧪 Running in test mode, shutting down automatically");
+    }
+    
+    return moduleSystem;
   } catch (error) {
     console.error("❌ Error during module registration:", error);
     process.exit(1);

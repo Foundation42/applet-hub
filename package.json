@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun run index.ts",
+    "test-start": "bun run index.ts --test",
     "examples": "bun run examples.ts",
     "test": "bun test",
     "typecheck": "bun tsc"
