@@ -1,5 +1,5 @@
 // admin-dashboard/components/main-view.ts
-import { UIComponentDefinition } from '../../../ui-components/services/UIComponentService';
+import { UIComponentDefinition } from '@ui-components/services/UIComponentService';
 import { systemInfoPanelComponent } from './panels/system-info-panel';
 import { moduleManagerPanelComponent } from './panels/module-manager-panel';
 import { tupleStoreExplorerPanelComponent } from './panels/tuplestore-explorer-panel';

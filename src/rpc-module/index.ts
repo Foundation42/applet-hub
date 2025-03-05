@@ -4,12 +4,12 @@ import {
   ModuleContext,
   ModuleState,
   ServiceDefinition,
-} from "../module-system/ModuleSystem";
+} from "@module-system/ModuleSystem";
 import {
   WebSocketServerService,
   WebSocketMessageHandler,
   WebSocketConnection,
-} from "../websocket-server";
+} from "@websocket-server";
 
 /**
  * RPC request

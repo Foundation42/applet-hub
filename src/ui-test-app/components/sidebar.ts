@@ -1,5 +1,5 @@
 // ui-test-app/components/sidebar.ts
-import { UIComponentDefinition } from '../../../ui-components/services/UIComponentService';
+import { UIComponentDefinition } from '@ui-components/services/UIComponentService';
 
 /**
  * Sidebar component for Ui Test App

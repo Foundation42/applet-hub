@@ -1,5 +1,5 @@
 // ui-test-app/components/index.ts
-import { UIComponentService } from '../../../ui-components/services/UIComponentService';
+import { UIComponentService } from '@ui-components/services/UIComponentService';
 import { mainViewComponent } from './main-view';
 import { sidebarComponent } from './sidebar';
 

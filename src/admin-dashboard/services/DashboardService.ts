@@ -1,5 +1,5 @@
 // admin-dashboard/services/DashboardService.ts
-import { ModuleContext } from '../../module-system/ModuleSystem';
+import { ModuleContext } from '@module-system/ModuleSystem';
 
 /**
  * System resource usage statistics

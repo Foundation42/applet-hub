@@ -1,6 +1,6 @@
 // ModuleSystem.ts - Core interfaces for the module system
 
-import { TupleStore } from "../tuple-store/TupleStore";
+import { TupleStore } from "@tuple-store/TupleStore";
 
 /**
  * Module manifest that describes a module and its requirements

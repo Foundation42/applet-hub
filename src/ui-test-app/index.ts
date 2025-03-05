@@ -1,5 +1,5 @@
 // ui-test-app/index.ts
-import { ModuleContext } from '../module-system/ModuleSystem';
+import { ModuleContext } from '@module-system/ModuleSystem';
 import { registerComponents } from './components';
 
 /**

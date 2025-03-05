@@ -1,7 +1,7 @@
 // ui-components/components/example.ts
 
 // Import the SDK
-import { createAppletHub } from '../../client-sdk/AppletHubClient';
+import { createAppletHub } from '@client-sdk/AppletHubClient';
 
 /**
  * Example of using the UI component library

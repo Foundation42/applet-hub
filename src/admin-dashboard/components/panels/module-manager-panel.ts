@@ -1,5 +1,5 @@
 // admin-dashboard/components/panels/module-manager-panel.ts
-import { UIComponentDefinition } from '../../../../ui-components/services/UIComponentService';
+import { UIComponentDefinition } from '@ui-components/services/UIComponentService';
 
 /**
  * Module Manager Panel

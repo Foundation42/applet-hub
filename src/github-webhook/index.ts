@@ -1,6 +1,6 @@
   // github-webhook/index.ts
-  import { Module, ModuleContext, ModuleState, ServiceDefinition } from '../module-system/ModuleSystem';
-  import { HttpRequestHandler, HttpServerService } from '../http-server';
+  import { Module, ModuleContext, ModuleState, ServiceDefinition } from '@module-system/ModuleSystem';
+  import { HttpRequestHandler, HttpServerService } from '@http-server';
   import { Server } from 'bun';
   import { Webhook } from 'svix';
   import { exec } from 'child_process';

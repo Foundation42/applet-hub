@@ -4,7 +4,7 @@ import {
   ModuleContext,
   ModuleState,
   ServiceDefinition,
-} from "../module-system/ModuleSystem";
+} from "@module-system/ModuleSystem";
 import { UIComponentService } from "./services/UIComponentService";
 import { registerComponents } from "./components";
 

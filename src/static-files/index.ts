@@ -3,8 +3,8 @@ import {
   Module,
   ModuleContext,
   ModuleState,
-} from "../module-system/ModuleSystem";
-import { HttpRequestHandler, HttpServerService } from "../http-server";
+} from "@module-system/ModuleSystem";
+import { HttpRequestHandler, HttpServerService } from "@http-server";
 import { Server } from "bun";
 import { join, extname, resolve, normalize } from "path";
 import { existsSync, statSync, readFileSync } from "fs";

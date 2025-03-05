@@ -1,5 +1,5 @@
 // ui-test-app/components/main-view.ts
-import { UIComponentDefinition } from '../../../ui-components/services/UIComponentService';
+import { UIComponentDefinition } from '@ui-components/services/UIComponentService';
 
 /**
  * Main view component for Ui Test App

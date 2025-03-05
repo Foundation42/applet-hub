@@ -4,7 +4,7 @@ import {
   ModuleContext,
   ModuleState,
   ServiceDefinition,
-} from "../module-system/ModuleSystem";
+} from "@module-system/ModuleSystem";
 import { serve, Server } from "bun";
 
 /**

@@ -1,5 +1,5 @@
 // admin-dashboard/components/panels/tuplestore-explorer-panel.ts
-import { UIComponentDefinition } from '../../../../ui-components/services/UIComponentService';
+import { UIComponentDefinition } from '@ui-components/services/UIComponentService';
 
 /**
  * TupleStore Explorer Panel
