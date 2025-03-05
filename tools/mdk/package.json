@@ -1,0 +1,32 @@
+{
+  "name": "@applethub/mdk",
+  "version": "0.1.0",
+  "description": "AppletHub Module Development Kit",
+  "type": "module",
+  "bin": {
+    "applet": "./bin/applet.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "applethub",
+    "modules",
+    "development",
+    "toolkit"
+  ],
+  "author": "AppletHub Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.0",
+    "fs-extra": "^11.1.0",
+    "inquirer": "^9.1.4"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/inquirer": "^9.0.3",
+    "typescript": "^5.0.0"
+  }
+}

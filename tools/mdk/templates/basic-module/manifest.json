@@ -1,0 +1,9 @@
+{
+  "id": "{{moduleId}}",
+  "name": "{{moduleName}}",
+  "description": "{{moduleDescription}}",
+  "version": "0.1.0",
+  "entryPoint": "index.ts",
+  "capabilities": [],
+  "dependencies": {}
+}
