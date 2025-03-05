@@ -248,6 +248,63 @@ export async function initialize(context: ModuleContext): Promise<boolean> {
                   // Initialize AppletHub global object
                   window.AppletHub = {
                     services: {
+                      themeService: {
+                        getTheme: function() {
+                          return {
+                            name: "light",
+                            colors: {
+                              primary: "#4a63e6",
+                              secondary: "#6c757d",
+                              background: "#ffffff",
+                              surface: "#f8f9fa",
+                              text: "#212529",
+                              textSecondary: "#6c757d",
+                              border: "#dee2e6",
+                              error: "#dc3545",
+                              warning: "#ffc107",
+                              success: "#28a745",
+                              info: "#17a2b8",
+                            },
+                            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            fontSize: {
+                              small: "0.875rem",
+                              base: "1rem",
+                              large: "1.25rem",
+                              xlarge: "1.5rem",
+                              xxlarge: "2rem",
+                            },
+                            spacing: {
+                              xs: "0.25rem",
+                              sm: "0.5rem",
+                              md: "1rem",
+                              lg: "1.5rem",
+                              xl: "2rem",
+                              xxl: "3rem",
+                            },
+                            borderRadius: {
+                              small: "0.25rem",
+                              base: "0.375rem",
+                              large: "0.5rem",
+                              full: "9999px",
+                            },
+                            shadows: {
+                              small: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+                              base: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
+                              large: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
+                            },
+                            darkMode: false,
+                          };
+                        },
+                        toggleDarkMode: function() {
+                          log('Theme service: toggling dark mode');
+                          // Theme toggle is handled by CSS classes in this test app
+                        },
+                        subscribe: function(callback) {
+                          // Simple implementation just calls the callback once
+                          callback(this.getTheme());
+                          return function() {}; // Return unsubscribe function
+                        }
+                      },
                       uiComponentService: {
                         components: new Map(),
                         styleElement: null,
@@ -260,9 +317,54 @@ export async function initialize(context: ModuleContext): Promise<boolean> {
                               this.styleElement.id = 'applethub-component-styles';
                               document.head.appendChild(this.styleElement);
                               log('UI Component Service initialized in browser');
+                              
+                              // Apply theme CSS variables to document root
+                              this.applyThemeToDocument();
                             } catch (error) {
                               console.error('Error initializing UI Component Service:', error);
                             }
+                          }
+                        },
+                        
+                        // Apply theme to document
+                        applyThemeToDocument: function() {
+                          try {
+                            const theme = window.AppletHub.services.themeService.getTheme();
+                            const root = document.documentElement;
+                            
+                            // Set colors
+                            for (const [key, value] of Object.entries(theme.colors)) {
+                              root.style.setProperty('--color-' + key, value);
+                              log('Setting CSS variable: --color-' + key + ' = ' + value);
+                            }
+                            
+                            // Set font
+                            root.style.setProperty("--font-family", theme.fontFamily);
+                            
+                            // Set font sizes
+                            for (const [key, value] of Object.entries(theme.fontSize)) {
+                              root.style.setProperty('--font-size-' + key, value);
+                            }
+                            
+                            // Set spacing
+                            for (const [key, value] of Object.entries(theme.spacing)) {
+                              root.style.setProperty('--spacing-' + key, value);
+                            }
+                            
+                            // Set border radius
+                            for (const [key, value] of Object.entries(theme.borderRadius)) {
+                              root.style.setProperty('--border-radius-' + key, value);
+                            }
+                            
+                            // Set shadows
+                            for (const [key, value] of Object.entries(theme.shadows)) {
+                              root.style.setProperty('--shadow-' + key, value);
+                            }
+                            
+                            log('Theme CSS variables applied to document');
+                          } catch (error) {
+                            console.error('Error applying theme to document:', error);
+                            log('Error applying theme: ' + error.message);
                           }
                         },
                         
@@ -759,6 +861,11 @@ export async function initialize(context: ModuleContext): Promise<boolean> {
                   themeToggle.addEventListener('click', () => {
                     document.body.classList.toggle('dark-mode');
                     log('Theme toggled to ' + (document.body.classList.contains('dark-mode') ? 'dark' : 'light') + ' mode');
+                    
+                    // Update theme via theme service if available
+                    if (window.AppletHub?.services?.themeService?.toggleDarkMode) {
+                      window.AppletHub.services.themeService.toggleDarkMode();
+                    }
                   });
                   
                   // Load all components when the page loads

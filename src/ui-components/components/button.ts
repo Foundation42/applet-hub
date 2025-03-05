@@ -64,11 +64,13 @@ export const buttonComponent: UIComponentDefinition = {
       align-items: center;
       justify-content: center;
       border: none;
-      border-radius: var(--border-radius-base);
-      font-family: var(--font-family);
+      border-radius: var(--border-radius-base, 0.375rem);
+      font-family: var(--font-family, system-ui, sans-serif);
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease-in-out;
+      appearance: button;
+      padding: 0.5rem 1rem;
     }
     
     .ah-button:disabled {
@@ -78,56 +80,56 @@ export const buttonComponent: UIComponentDefinition = {
     
     /* Variants */
     .ah-button-primary {
-      background-color: var(--color-primary);
+      background-color: var(--color-primary, #4a63e6);
       color: white;
     }
     
     .ah-button-primary:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      background-color: color-mix(in srgb, var(--color-primary, #4a63e6) 90%, black);
     }
     
     .ah-button-secondary {
-      background-color: var(--color-secondary);
+      background-color: var(--color-secondary, #6c757d);
       color: white;
     }
     
     .ah-button-secondary:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-secondary) 90%, black);
+      background-color: color-mix(in srgb, var(--color-secondary, #6c757d) 90%, black);
     }
     
     .ah-button-outline {
       background-color: transparent;
-      color: var(--color-primary);
-      border: 1px solid var(--color-primary);
+      color: var(--color-primary, #4a63e6);
+      border: 1px solid var(--color-primary, #4a63e6);
     }
     
     .ah-button-outline:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+      background-color: color-mix(in srgb, var(--color-primary, #4a63e6) 10%, transparent);
     }
     
     .ah-button-text {
       background-color: transparent;
-      color: var(--color-primary);
+      color: var(--color-primary, #4a63e6);
     }
     
     .ah-button-text:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+      background-color: color-mix(in srgb, var(--color-primary, #4a63e6) 10%, transparent);
     }
     
     /* Sizes */
     .ah-button-small {
       padding: 0.25rem 0.5rem;
-      font-size: var(--font-size-small);
+      font-size: var(--font-size-small, 0.875rem);
     }
     
     .ah-button-medium {
       padding: 0.5rem 1rem;
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-base, 1rem);
     }
     
     .ah-button-large {
       padding: 0.75rem 1.5rem;
-      font-size: var(--font-size-large);
+      font-size: var(--font-size-large, 1.25rem);
     }
   `,
 };
@@ -181,9 +183,10 @@ export const iconButtonComponent: UIComponentDefinition = {
       align-items: center;
       justify-content: center;
       border: none;
-      border-radius: var(--border-radius-full);
+      border-radius: var(--border-radius-full, 9999px);
       cursor: pointer;
       transition: all 0.2s ease-in-out;
+      appearance: button;
     }
     
     .ah-icon-button:disabled {
@@ -193,44 +196,50 @@ export const iconButtonComponent: UIComponentDefinition = {
     
     /* Variants */
     .ah-icon-button-primary {
-      background-color: var(--color-primary);
+      background-color: var(--color-primary, #4a63e6);
       color: white;
     }
     
     .ah-icon-button-primary:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      background-color: color-mix(in srgb, var(--color-primary, #4a63e6) 90%, black);
     }
     
     .ah-icon-button-secondary {
-      background-color: var(--color-secondary);
+      background-color: var(--color-secondary, #6c757d);
       color: white;
     }
     
     .ah-icon-button-outline {
       background-color: transparent;
-      color: var(--color-primary);
-      border: 1px solid var(--color-primary);
+      color: var(--color-primary, #4a63e6);
+      border: 1px solid var(--color-primary, #4a63e6);
     }
     
     .ah-icon-button-text {
       background-color: transparent;
-      color: var(--color-primary);
+      color: var(--color-primary, #4a63e6);
     }
     
     /* Sizes */
     .ah-icon-button-small {
       width: 2rem;
       height: 2rem;
+      min-width: 2rem;
+      min-height: 2rem;
     }
     
     .ah-icon-button-medium {
       width: 2.5rem;
       height: 2.5rem;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
     }
     
     .ah-icon-button-large {
       width: 3rem;
       height: 3rem;
+      min-width: 3rem;
+      min-height: 3rem;
     }
     
     /* Icons */
