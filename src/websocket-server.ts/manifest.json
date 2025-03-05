@@ -1,0 +1,12 @@
+// websocket-server/manifest.json
+{
+  "id": "websocket-server",
+  "name": "WebSocket Server",
+  "description": "WebSocket server module for AppletHub",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["websocket-server"],
+  "dependencies": {
+    "http-server": "^1.0.0"
+  }
+}

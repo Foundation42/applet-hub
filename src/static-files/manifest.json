@@ -1,0 +1,12 @@
+// static-files/manifest.json
+{
+  "id": "static-files",
+  "name": "Static Files",
+  "description": "Static file serving module for AppletHub",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["static-files"],
+  "dependencies": {
+    "http-server": "^1.0.0"
+  }
+}

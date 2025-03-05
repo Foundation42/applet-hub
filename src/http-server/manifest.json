@@ -1,0 +1,10 @@
+// http-server/manifest.json
+{
+  "id": "http-server",
+  "name": "HTTP Server",
+  "description": "Core HTTP server module for AppletHub",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["http-server"],
+  "dependencies": {}
+}

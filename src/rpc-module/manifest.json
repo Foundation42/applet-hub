@@ -1,0 +1,12 @@
+// rpc/manifest.json
+{
+  "id": "rpc",
+  "name": "RPC System",
+  "description": "JSON-RPC over WebSockets for AppletHub",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["rpc"],
+  "dependencies": {
+    "websocket-server": "^1.0.0"
+  }
+}

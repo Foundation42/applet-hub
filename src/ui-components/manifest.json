@@ -1,0 +1,10 @@
+// ui-components/manifest.json
+{
+  "id": "ui-components",
+  "name": "UI Component Library",
+  "description": "Standard UI component library for AppletHub",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["ui-components", "design-system"],
+  "dependencies": {}
+}

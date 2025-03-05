@@ -1,0 +1,12 @@
+// github-webhook/manifest.json
+{
+  "id": "github-webhook",
+  "name": "GitHub Webhook",
+  "description": "GitHub webhook handler for automatic deployment",
+  "version": "1.0.0",
+  "entryPoint": "index.ts",
+  "capabilities": ["github-webhook"],
+  "dependencies": {
+    "http-server": "^1.0.0"
+  }
+}
