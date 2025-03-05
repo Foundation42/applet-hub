@@ -3,6 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun run index.ts",
+    "examples": "bun run examples.ts",
+    "test": "bun test",
+    "typecheck": "bun tsc"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

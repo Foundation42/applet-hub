@@ -79,5 +79,53 @@ export function createTupleStore(
   return store;
 }
 
+/**
+ * Factory object for creating various tuple store configurations
+ */
+export const TupleStoreFactory = {
+  /**
+   * Create a basic tuple store without journaling or observability
+   */
+  createBasic(): TupleStore {
+    return new CoreTupleStore();
+  },
+  
+  /**
+   * Create a journaled tuple store
+   */
+  createJournaled(): TupleStore {
+    return new JournaledTupleStore({
+      store: new CoreTupleStore(),
+    });
+  },
+  
+  /**
+   * Create an observable tuple store
+   */
+  createObservable(): TupleStore {
+    return new ObservableTupleStore({
+      store: new CoreTupleStore(),
+    });
+  },
+  
+  /**
+   * Create a full-featured tuple store with both journaling and observability
+   */
+  createFullFeatured(): TupleStore {
+    return new ObservableTupleStore({
+      store: new JournaledTupleStore({
+        store: new CoreTupleStore(),
+      }),
+    });
+  },
+  
+  /**
+   * Create a customized tuple store with the specified options
+   */
+  create(options: TupleStoreFactoryOptions = {}): TupleStore {
+    return createTupleStore(options);
+  }
+};
+
 // Default export is a convenience function that creates a full-featured store
 export default createTupleStore;
