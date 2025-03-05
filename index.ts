@@ -84,7 +84,19 @@ async function main() {
       const uiTestApp = await import('./src/ui-test-app/index');
       const uiTestAppModule = {
         initialize: uiTestApp.initialize,
-        stop: uiTestApp.cleanup,
+        stop: async () => {
+          const context = {
+            manifest: uiTestAppModule.getManifest(), 
+            store: moduleSystem.systemStore,
+            system: moduleSystem.systemStore,
+            services: moduleSystem.serviceRegistry,
+            getModule: (id) => {
+              const mod = loadedModules.find(m => m.getManifest().id === id);
+              return mod || null;
+            }
+          };
+          return uiTestApp.cleanup(context);
+        },
         getState: () => 'active',
         getManifest: () => ({
           id: 'ui-test-app',
